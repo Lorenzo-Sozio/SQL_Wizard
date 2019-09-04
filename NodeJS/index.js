@@ -43,13 +43,14 @@ app.get('/run', function (req, res) {
   // prettyJSON(parsedQs);
 
   var righe, pianoesecuzione
-  var data =	{ rows: [{}], explain: [{}] }
+  var data =	{ rows: [{}], explain: [{}], error:"" }
 
   // Object.keys(parsedQs).forEach(function(key) {
   const key = 'query'
   const explain_sql = 'EXPLAIN ' + parsedQs[key]
   console.log(explain_sql)
   connection.query(parsedQs[key], function (err, rows_1, fields) {
+	if(err) {data.error=err}
     if (err) { console.log('Error while performing Query.' + err) }
 
     data.rows = rows_1
