@@ -1,6 +1,7 @@
 var web_service_address = 'http://localhost:8000'
 
 var current_idx = 1
+var sql_table = ''
 var sql_1 = ''
 var sql_2 = ''
 var sql_3 = ''
@@ -15,6 +16,15 @@ function ImpostaValoreSelezionato (Riga, Valore, Campo, FromSelection) {
 
   GetWhereClause()
 }
+function SetValueField(){
+	if(sql_1 == "UPDATE ")
+		SetUpdateValueField()
+	else if(sql_1 == "INSERT INTO")
+		SetInsertValueField()
+}
+function RefreshSQLCode(){
+	$('#sql_code').val(sql_1 + ' ' + sql_table + ' ' + sql_2 + ' ' + sql_3)
+}
 function SetUpdateValueField () {
   let sql = ''
 
@@ -28,13 +38,36 @@ function SetUpdateValueField () {
     if (sql == '') { sql += ' ' + field + '=' + val + ' ' } else { sql += ', ' + field + '=' + val + ' ' }
   })
 
-  sql = 'SET' + sql
+  sql = sql_table + ' SET ' + sql
 
   sql_2 = sql
-
-  $('#sql_code').val(sql_1 + ' ' + sql_2 + ' ' + sql_3)
+  
+	RefreshSQLCode()
+	
 }
+function SetInsertValueField () {
+  
+  let fields = ''
+  let values = ''
+  $('#tbl_body_fields  > tr').each(function (i, row) {
+    row = $(row).find('input[type=text],input:not([readonly])')
 
+    const field = $(row[1]).data('field')
+    var val = $(row[1]).val()
+	if (isNaN(val)) { val = '"' + val + '"'}
+    if (val == '') { return }
+    
+	fields += field + ','
+	values += val + ','
+  })
+
+	fields = fields.substring(0, fields.length - 1)
+	values = values.substring(0, values.length - 1)
+	
+  sql_2 = ' ( '+fields+' ) '+ ' VALUES ( ' + values + ' )'
+
+  RefreshSQLCode()
+}
 function ImpostaCondizioneSelezionata (Riga, Cond) {
   $('#riga' + Riga).find('.btn').data('data-condizione', Cond)
   GetWhereClause()
@@ -58,7 +91,7 @@ function GetWhereClause () {
 
   if (sql == 'WHERE') { sql_3 = '' } else { sql_3 = sql.substring(0, sql.length - 2) }
 
-  $('#sql_code').val(sql_1 + ' ' + sql_2 + ' ' + sql_3)
+  RefreshSQLCode()
 }
 
 $(document).ready(function () {
@@ -109,7 +142,7 @@ $(document).ready(function () {
     $('#qry_' + current_idx).removeClass('hidden')
     $('#page-item-prev').removeClass('disabled')
 
-    if (current_idx == 3 && sql_1 == 'UPDATE ') {
+    if (current_idx == 3 && (sql_1 == 'UPDATE ' || sql_1 == 'INSERT INTO')) {
       CreaTabellaCampi()
       const tbl_campi = $('#qry_fields').html()
       $('#qry_fields').empty()
@@ -149,6 +182,11 @@ $(document).ready(function () {
 
   $('#esegui').click(function () {
 	  $.getJSON(web_service_address + '/run?query=' + GetSql(), function (data) {
+		  
+		if(data.error!=''){
+			alert("Errore nella query: "+data.error.sqlMessage)
+			return
+		}
       var tbl_ris 	= CreaTabellaDati(data.rows)
       var tbl_explain	= CreaTabellaDati(data.explain)
 
@@ -201,45 +239,71 @@ $(document).ready(function () {
 
 			  sql_2 = ''
 			  var objects = data.instance.get_selected(true)
+			switch(sql_1){
+				case 'SELECT ':
+				 
+				 var tables = GetTablesSelected()
 
-			  if (sql_1 == 'SELECT ') {
-          var tables = GetTablesSelected()
+				  for (var i in objects) {
+					if (objects[i].parent != '#') {
+					  const get_json = data.instance.get_json()
+					  const tbl = GetParent(get_json, objects[i].parent)
+					  sql_2 += tbl + '.' + objects[i].text + ','
+					}
+				  }
+				sql_2 = sql_2.substring(0, sql_2.length - 1)
+				sql_2 += ' FROM '
+				
+					break;
+				case 'INSERT INTO':
+				
+					var tables = GetTablesSelected()
 
-          for (var i in objects) {
-            if (objects[i].parent != '#') {
-              const get_json = data.instance.get_json()
-              const tbl = GetParent(get_json, objects[i].parent)
-              sql_2 += tbl + '.' + objects[i].text + ','
-            }
-          }
+					for (var i in objects) {
+						if (objects[i].parent != '#') {
+						const get_json = data.instance.get_json()
+						const tbl = GetParent(get_json, objects[i].parent)
+						sql_2 += tbl + '.' + objects[i].text + ','
+						}
+					}
+					
+					CreaTabellaCampi()
+					sql_table=""
+					for (var i in tables) {
+						sql_table += tables[i] + ','
+					}
+					sql_table = sql_table.substring(0, sql_table.length - 1)
+					console.log(sql_table)
+					
+					break;
+				case 'UPDATE ':
+					for (var i in objects)
+						if (objects[i].parent == '#') { sql_2 += objects[i].text + ',' }
 
-          sql_2 = sql_2.substring(0, sql_2.length - 1)
-          sql_2 += ' FROM '
-			  } else if (sql_1 == 'UPDATE ') {
-          for (var i in objects) {
-            if (objects[i].parent == '#') { sql_2 += objects[i].text + ',' }
-          }
+					CreaTabellaCampi()
+					sql_table=""
+					for (var i in tables) {
+						sql_table += tables[i] + ','
+					}
+					sql_table = sql_table.substring(0, sql_table.length - 1)
 
-				  sql_2 = sql_2.substring(0, sql_2.length - 1)
-          // sql_2 += " SET ";
-			  }
-
-			  CreaTabellaCampi()
-			  $('#tbl_body_conditions').empty()
-			  CreaTabellaCondizioni()
-
-			  for (var i in tables) {
-          sql_2 += tables[i] + ','
-			  }
-			  sql_2 = sql_2.substring(0, sql_2.length - 1)
-
+					
+					break;
+				case 'DELETE FROM':
+					break;
+			}
+			
+			$('#tbl_body_conditions').empty()
+			CreaTabellaCondizioni()
+				/*
 			  var leaves = $.grep(objects, function (o) { return data.instance.is_leaf(o) })
 			  var list = $('#output')
 			  list.empty()
 			  $.each(leaves, function (i, o) {
           $('<li/>').text(o.text).appendTo(list)
 			  })
-			  $('#sql_code').val(sql_1 + ' ' + sql_2)
+			  */
+			  RefreshSQLCode()
       })
     })
   }
@@ -399,10 +463,10 @@ $(document).ready(function () {
             tbl += `		
 				<tr>					
 					<td>
-						<input type="text" readonly class="form-control-plaintext" value="` + tabelle[i] + '.' + data.Rows[d].Field + `">
+						<input type="text" readonly class="form-control-plaintext" value="` + data.Table + '.' + data.Rows[d].Field + `">
 					</td>
 					<td >
-						<input type="text" data-field="` + tabelle[i] + '.' + data.Rows[d].Field + `" onkeyup="$(this).trigger('change');" onchange="SetUpdateValueField();" placeholder="" class="form-control">
+						<input type="text" data-field="` + data.Table + '.' + data.Rows[d].Field + `" onkeyup="$(this).trigger('change');" onchange="SetValueField();" placeholder="" class="form-control">
 					</td>
 				</tr>
 				`
@@ -416,10 +480,6 @@ $(document).ready(function () {
   }
   function CreaTabellaDati (data) {
 	var tbl_body = ''	
-	if(data==undefined){
-		  alert("Errore nella query.")
-		  return tbl_body
-	  }
     
     var odd_even = false
 
@@ -452,7 +512,6 @@ $(document).ready(function () {
     $.when.apply($, promises).then(function (data) {
 
     }, function (e) {
-      console.log('fail', arguments)
     }).always(function () {
       var lista1 = ''
       var lista2 = ''
