@@ -111,6 +111,8 @@ $(document).ready(function () {
 	$('#page-item-prev').addClass('disabled')
 		  
     $('#sql_code').val('')
+	$('#sql_risultato').html('');
+	$('#sql_explain').html('');
   })
   $('#btn_select').click(function () {
     sql_1 = 'SELECT '
