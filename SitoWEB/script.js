@@ -38,7 +38,7 @@ function SetUpdateValueField () {
     if (sql == '') { sql += ' ' + field + '=' + val + ' ' } else { sql += ', ' + field + '=' + val + ' ' }
   })
 
-  sql = sql_table + ' SET ' + sql
+  sql = ' SET ' + sql
 
   sql_2 = sql
   
@@ -86,10 +86,10 @@ function GetWhereClause () {
 
     condizione = $(row).find('.btn').data('data-condizione')
     if (condizione == undefined) { condizione = '=' }
-    if (campo1 != '' && campo2 != '') { sql += ' ' + campo1 + ' ' + condizione + ' ' + campo2 + ' &&' }
+    if (campo1 != '' && campo2 != '') { sql += ' ' + campo1 + ' ' + condizione + ' ' + campo2 + ' AND' }
   })
 
-  if (sql == 'WHERE') { sql_3 = '' } else { sql_3 = sql.substring(0, sql.length - 2) }
+  if (sql == 'WHERE') { sql_3 = '' } else { sql_3 = sql.substring(0, sql.length - 3) }
 
   RefreshSQLCode()
 }
@@ -99,6 +99,7 @@ $(document).ready(function () {
 	sql_1=""
 	sql_2="";
 	sql_3="";
+	sql_table="";
 	current_idx=1;
 		  
 	for (let i = 1; i <= 3; i++) {
@@ -252,7 +253,7 @@ $(document).ready(function () {
 					}
 				  }
 				sql_2 = sql_2.substring(0, sql_2.length - 1)
-				sql_2 += ' FROM '
+				sql_2 += ' FROM ' + tables;
 				
 					break;
 				case 'INSERT INTO':
@@ -273,13 +274,15 @@ $(document).ready(function () {
 						sql_table += tables[i] + ','
 					}
 					sql_table = sql_table.substring(0, sql_table.length - 1)
-					console.log(sql_table)
 					
 					break;
 				case 'UPDATE ':
+				
+					var tables = GetTablesSelected()
+					/*
 					for (var i in objects)
 						if (objects[i].parent == '#') { sql_2 += objects[i].text + ',' }
-
+					*/
 					CreaTabellaCampi()
 					sql_table=""
 					for (var i in tables) {
@@ -290,6 +293,16 @@ $(document).ready(function () {
 					
 					break;
 				case 'DELETE FROM':
+					
+					sql_table ="";
+					
+					var tables = GetTablesSelected()					
+					
+					for (var i in tables) {
+						sql_table += tables[i] + ','
+					}
+					sql_table = sql_table.substring(0, sql_table.length - 1)
+
 					break;
 			}
 			
