@@ -209,7 +209,7 @@ $(document).ready(function () {
 	 })
 
   function CreaTreeView (full) {
-    $.getJSON(web_service_address + '/getall', function (data) {
+    $.getJSON(web_service_address + '/tables', function (data) {
       const tree = DataToTreeView(data, full)
       $('#jstree').jstree('destroy')
 			 $('#jstree').jstree({
