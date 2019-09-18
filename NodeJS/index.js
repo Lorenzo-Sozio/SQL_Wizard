@@ -66,7 +66,7 @@ app.get('/run', function (req, res) {
   })
 })
 
-app.get('/getall', function (req, res) {
+app.get('/tables', function (req, res) {
   // Website you wish to allow to connect
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080')
 
