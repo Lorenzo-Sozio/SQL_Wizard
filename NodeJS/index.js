@@ -42,13 +42,13 @@ app.use(function printSession(req, res, next) {
 
 
 app.post('/setconnection',function(req,res){
-	console.log('req.session.id ->'+ req.session.id,'req.session', req.session);
 	
 	req.session.host     = req.body.host;
 	req.session.user     = req.body.user;
 	req.session.password = req.body.password;
 	req.session.database = req.body.database;
 
+	console.log('req.session.id ->'+ req.session.id,'req.session', req.session);
 	return res.status(200).send();
 });
 app.get('/destroyconnection',function(req,res){
@@ -96,13 +96,11 @@ app.get('/run', function (req, res) {
     connection.query(explain_sql, function (err, rows_2, fields) {
       if (err) { console.log('Error while performing Query.' + err) }
       data.explain = rows_2
-
-	  res.end(data);
+	  
+	  connection.end();
+	  res.end(data);	  
     })
   })
-  
-  
-  connection.end();
 })
 
 app.get('/tables', function (req, res) {
@@ -182,7 +180,7 @@ app.get('/fields', function (req, res) {
 	connection.end();
     res.statusCode = 200
     ret.Rows = ris
-	res.send(ris);
+	res.send(ret);
   })
   
 })
@@ -192,29 +190,4 @@ app.listen(port, function() {
 });
 function prettyJSON (obj) {
   console.log(JSON.stringify(obj, null, 2))
-}
-
-
-class Database {
-    constructor( config ) {
-        this.connection = mysql.createPool( config );
-    }
-    query( sql, args ) {		
-        return new Promise( ( resolve, reject ) => {
-            this.connection.query( sql, args, ( err, rows, fields ) => {
-                if ( err )
-                    return reject( err );
-                resolve( err, rows, fields );
-            } );
-        } );
-    }
-    close() {
-        return new Promise( ( resolve, reject ) => {
-            this.connection.end( err => {
-                if ( err )
-                    return reject( err );
-                resolve();
-            } );
-        } );
-    }
 }

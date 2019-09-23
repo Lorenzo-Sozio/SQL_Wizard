@@ -49,6 +49,7 @@ function SetInsertValueField () {
   
   let fields = ''
   let values = ''
+  
   $('#tbl_body_fields  > tr').each(function (i, row) {
     row = $(row).find('input[type=text],input:not([readonly])')
 
@@ -95,9 +96,20 @@ function GetWhereClause () {
 }
 
 $(document).ready(function () {
-	$("#param_conn").hide();
 	
 	CreaTreeView(true);
+	
+	$('#parametri').click(function(){
+		$("#param_conn").toggle();
+		$("#sql_wizard").toggle();
+	})		
+	
+	$("#param_conn").on("hide", function() { 
+		$("#sql_wizard").show();
+	});
+	$("#param_conn").on("show", function() { 
+		$("#sql_wizard").hide();
+	});
 	
   $('#btn_clear').click(function () {
 	sql_1=""
@@ -215,6 +227,7 @@ $(document).ready(function () {
 			error: function(jqXHR) {
 				if (jqXHR.status == 406) {
 					$("#param_conn").show();
+					$("#sql_wizard").hide();
 					alert("Parametri connessione non validi!");
 				}
 	  }})
@@ -341,14 +354,6 @@ $(document).ready(function () {
 			
 			$('#tbl_body_conditions').empty()
 			CreaTabellaCondizioni()
-				/*
-			  var leaves = $.grep(objects, function (o) { return data.instance.is_leaf(o) })
-			  var list = $('#output')
-			  list.empty()
-			  $.each(leaves, function (i, o) {
-          $('<li/>').text(o.text).appendTo(list)
-			  })
-			  */
 			  RefreshSQLCode()
       })
 		},
@@ -362,9 +367,8 @@ $(document).ready(function () {
   }
   
   $("#btn_setconn").click(function(e) {
-		
+
 	var ser = $("#form_param").serialize();
-	ser = "host=localhost&user=root&password=toor&database=progetto";
 	
 	var obj = $("#form_param").serializeArray();
 	var json = [];
@@ -384,14 +388,15 @@ $(document).ready(function () {
 
 	  success: (data, textStatus, jqXHR)=>{
 			$("#param_conn").hide();
+			$("#sql_wizard").show();
 			alert("Connessione OK!");
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 
-			alert(jqXHR.status, textStatus);					
+			alert("Parametri di connessione non validi");					
 		},
 		failure: function (response) {
-			alert(response.d);
+			alert("Parametri di connessione non validi");					
 		}
 	})
 	
@@ -460,17 +465,6 @@ $(document).ready(function () {
       }
     })
 
-    // add delete button and td
-    /*
-        $("<td></td>").append(
-            $("<button class='btn btn-danger glyphicon glyphicon-remove row-remove'></button>")
-                .click(function() {
-                    $(this).closest("tr").remove();
-                })
-        ).appendTo($(tr));
-        */
-
-    // add the new row
     $(tr).appendTo($('#tab_logic'))
 
     $(tr).find('td button.row-remove').on('click', function () {
@@ -489,13 +483,7 @@ $(document).ready(function () {
 
     return $helper
   }
-  /*
-    $(".table-sortable tbody").sortable({
-        helper: fixHelperModified
-    }).disableSelection();
 
-    $(".table-sortable thead").disableSelection();
-	*/
   $('#add_row').trigger('click')
   function ArrayAddIfNotExist (arr, search) {
     let trovato = false
@@ -550,52 +538,42 @@ $(document).ready(function () {
     var tabelle = GetTablesSelected()
 
     for (var i in tabelle) {
-		$.ajaxajax(web_service_address + '/fields?table=' + tabelle[i], {
-    type: "GET",
-    contentType: "text/plain",
-    xhrFields: {
-       withCredentials: true
-    },
-    crossDomain: true,
-	//async:true,
-	success: function(data){
-		for (var d in data.Rows) {
-            tbl += `		
-				<tr>					
-					<td>
-						<input type="text" readonly class="form-control-plaintext" value="` + data.Table + '.' + data.Rows[d].Field + `">
-					</td>
-					<td >
-						<input type="text" data-field="` + data.Table + '.' + data.Rows[d].Field + `" onkeyup="$(this).trigger('change');" onchange="SetValueField();" placeholder="" class="form-control">
-					</td>
-				</tr>
-				`
-          }
-		$('#tbl_body_fields').html(tbl)
-		
-		$("#div1").html(result);
-		},
-	error: function(jqXHR) {
-			if (jqXHR.status == 406) {
-				$("#param_conn").show();
-				alert("Parametri connessione non validi!");
-			} 
-	}
-	});
+		$.ajax(web_service_address + '/fields?table=' + tabelle[i], {
+			type: "GET",
+			contentType: "text/plain",
+			xhrFields: {
+			   withCredentials: true
+			},
+			crossDomain: true,
+			//async:true,
+			success: function(data){
+				for (var d in data.Rows) {
+					tbl += `		
+						<tr>					
+							<td>
+								<input type="text" readonly class="form-control-plaintext" value="` + data.Table + '.' + data.Rows[d].Field + `">
+							</td>
+							<td >
+								<input type="text" data-field="` + data.Table + '.' + data.Rows[d].Field + `" onkeyup="$(this).trigger('change');" onchange="SetValueField();" placeholder="" class="form-control">
+							</td>
+						</tr>
+						`
+				  }
+				$('#tbl_body_fields').html(tbl)
+				
+				$("#div1").html(result);
+				},
+			error: function(jqXHR) {
+					if (jqXHR.status == 406) {
+						$("#param_conn").show();
+						alert("Parametri connessione non validi!");
+					} 
+			}
+		});
 	}
 }
-		/*
-      $.getJSON(web_service_address + '/fields?table=' + tabelle[i])
-        .then(function (data) {
-          
-        })
-        .fail(function () {
-        // ...didn't work, handle it
-        })
-		
-    }
-  }
-  */
+
+  
   function CreaTabellaDati (data) {
 	var tbl_body = ''	
     
@@ -625,6 +603,21 @@ $(document).ready(function () {
 
     for (var i in tabelle) {
       //promises.push($.getJSON(web_service_address + '/fields?table=' + tabelle[i]))
+	  
+	  
+	  promises.push(
+		$.ajax(web_service_address + '/fields?table=' + tabelle[i], {
+			type: "GET",
+			contentType: "text/plain",
+			xhrFields: {
+			   withCredentials: true
+			},
+			crossDomain: true
+			//async:true,
+		})
+	  )
+	  
+	  
     }
 
     $.when.apply($, promises).then(function (data) {

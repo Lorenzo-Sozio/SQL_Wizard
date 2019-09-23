@@ -43,7 +43,8 @@
                      <!--<li><a id="loginLink" class="navitem login" href="#">Log in</a></li>-->
                   </ul>
                   <ul class="nav navbar-nav navbar-right">
-                     <li><a id="parametri" class="navitem login" href="./parametri.html">Parametri</a></li>
+                     <!--<li><a id="parametri" class="navitem login" href="./parametri.html">Parametri</a></li>-->
+					 <li><a id="parametri" class="navitem login">Parametri</a></li>
                   </ul>
                </div>
             </div>
@@ -57,7 +58,8 @@
                <hr>
 			   
 			   
-			  <div id="param_conn" class="form-row align-items-center">
+			  <div id="param_conn" >
+			  <form id="form_param" class="form-row align-items-center">
 				<div class="col-auto">
 				  <label class="sr-only" for="inlineFormInput">Host</label>
 				  <input type="text" class="form-control mb-2" name="host" placeholder="Host">
@@ -80,8 +82,9 @@
 				  <!--<button type="submit" id="btn_setconn" class="btn btn-primary mb-2">Connetti</button>-->
 				  <input type="button"id="btn_setconn" class="btn btn-primary mb-2" value="Connetti" />
 				</div>
+				</form>
 			  </div>
-			
+				<div style="display:none" id="sql_wizard">
 			
 			
                <div class="row text-left">
@@ -221,6 +224,7 @@
                      </div>
                   </div>
                </div>
+			   </div>
             </div>
          </div>
       </div>
