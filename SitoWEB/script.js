@@ -95,6 +95,10 @@ function GetWhereClause () {
 }
 
 $(document).ready(function () {
+	$("#param_conn").hide();
+	
+	CreaTreeView(true);
+	
   $('#btn_clear').click(function () {
 	sql_1=""
 	sql_2="";
@@ -210,32 +214,10 @@ $(document).ready(function () {
 			},
 			error: function(jqXHR) {
 				if (jqXHR.status == 406) {
-					//window.location.replace("http://localhost:8080/parametri.html");
-				} 
+					$("#param_conn").show();
+					alert("Parametri connessione non validi!");
+				}
 	  }})
-
-					
-					
-					
-		/*			
-	  $.getJSON(web_service_address + '/run?query=' + GetSql(), function (data) {
-		  
-		if(data.error!=''){
-			alert("Errore nella query: "+data.error.sqlMessage)
-			return
-		}
-      var tbl_ris 	= CreaTabellaDati(data.rows)
-      var tbl_explain	= CreaTabellaDati(data.explain)
-
-      $('#sql_risultato').html(tbl_ris)
-      $('#sql_explain').html(tbl_explain)
-	  }).fail(function(jqXHR) {
-			if (jqXHR.status == 406) {
-				window.location.replace("http://localhost:8080/parametri.html");
-			} 
-		});  
-		
-		*/
   })
   
 
@@ -372,7 +354,8 @@ $(document).ready(function () {
 		},
 		error: function(jqXHR) {
 			if (jqXHR.status == 406) {
-				//window.location.replace("parametri.html");
+				$("#param_conn").show();
+				alert("Parametri connessione non validi!");
 			}
 		}
 	});	
@@ -593,9 +576,10 @@ $(document).ready(function () {
 		$("#div1").html(result);
 		},
 	error: function(jqXHR) {
-		if (jqXHR.status == 406) {
-			//window.location.replace("parametri.html");
-		} 
+			if (jqXHR.status == 406) {
+				$("#param_conn").show();
+				alert("Parametri connessione non validi!");
+			} 
 	}
 	});
 	}

@@ -33,52 +33,33 @@ app.use(sessionMiddleware);
 app.use(function printSession(req, res, next) {
 	
 	res.header('Access-Control-Allow-Origin', req.headers.origin);
-
-	//res.header("Access-Control-Allow-Origin", "*");
 	//res.header("Access-Control-Allow-Origin", "http://localhost:8080");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, authorization");
     res.header("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT,OPTIONS");
-	
-	//res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080')
-	//res.setHeader('Access-Control-Allow-Credentials', 'true')
-	//res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-	//res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 
-	//console.log('req.session.id ->'+ req.session.id,'req.session', req.session);
   return next();
 });
 
 
 app.post('/setconnection',function(req,res){
-
-  req.session.host     = req.body.host;
-  req.session.user     = req.body.user;
-  req.session.password = req.body.password;
-  req.session.database = req.body.database;
-  
-  
-  	console.log('req.session.id ->'+ req.session.id,'req.session', req.session);
-
-	/*
-	 req.session.save(function(err) {
-		 if(err)
-			console.log(err);
-
-		return res.status(200).send();
-	})
-	*/
+	console.log('req.session.id ->'+ req.session.id,'req.session', req.session);
 	
+	req.session.host     = req.body.host;
+	req.session.user     = req.body.user;
+	req.session.password = req.body.password;
+	req.session.database = req.body.database;
+
 	return res.status(200).send();
 });
 app.get('/destroyconnection',function(req,res){
   console.log("DESTROY");
   req.session.destroy(function(err) {
-    if(err) {
-      console.log(err);
-    } else {
-      res.redirect('/');
+	if(err) {
+	  console.log(err);
+	} else {
+	  res.redirect('/');
 	  return res.end();
-    }
+	}
   });
 });
 
@@ -86,9 +67,7 @@ app.get('/run', function (req, res) {
   	console.log('req.session.id ->'+ req.session.id,'req.session', req.session);
 
 	if (!req.session.host){
-		//return   res.status(406).send('Parametri non impostati!');
-		res.status(406);
-		return res.end(406+"");
+		return res.status(406).send();
 	}
 
   const connection = mysql.createPool( {
@@ -100,12 +79,10 @@ app.get('/run', function (req, res) {
 	  
   const parsedUrl = url.parse(address + req.url)
   const parsedQs = querystring.parse(parsedUrl.query)
-  // prettyJSON(parsedQs);
 
   var righe, pianoesecuzione
   var data =	{ rows: [{}], explain: [{}], error:"" }
 
-  // Object.keys(parsedQs).forEach(function(key) {
   const key = 'query'
   const explain_sql = 'EXPLAIN ' + parsedQs[key]
   console.log(explain_sql)
@@ -120,9 +97,6 @@ app.get('/run', function (req, res) {
       if (err) { console.log('Error while performing Query.' + err) }
       data.explain = rows_2
 
-      //res.statusCode = 200
-      // res.setHeader('Content-Type', 'text/plain');
-      //res.send(data)
 	  res.end(data);
     })
   })
@@ -135,9 +109,7 @@ app.get('/tables', function (req, res) {
   	console.log('req.session.id ->'+ req.session.id,'req.session', req.session);
 
 	if (!req.session.host){
-		//return   res.status(406).send('Parametri non impostati!');
-		res.status(406);
-		return res.end(406+"");
+		return res.status(406).send();
 	}
 
   const connection = mysql.createPool( {
@@ -172,24 +144,20 @@ app.get('/tables', function (req, res) {
 
     // Wait for all to complete before responding
     Promise.all(promises).then(function () {
-      // prettyJSON(ris);
       res.statusCode = 200
-      // res.setHeader('Content-Type', 'text/plain');
       res.send(ris)
 
     }).catch(function (err) {
       console.log(sql + ' Error while performing Query.' + err)
 	  
 	  res.end();
-      //res.send() // Fail (stops after first error)
     })
   })
 })
 app.get('/fields', function (req, res) {
 
 	if (!req.session.host){
-		//return res.redirect('http://localhost:8080/parametri.html');
-		return   res.end(406+"");
+		return res.status(406).send();
 	}
 
   const connection = mysql.createPool( {
@@ -212,11 +180,8 @@ app.get('/fields', function (req, res) {
     if (err) { console.log(sql + ' Error while performing Query.' + err) }
 
 	connection.end();
-    // prettyJSON(ris);
     res.statusCode = 200
-    // res.setHeader('Content-Type', 'text/plain');
     ret.Rows = ris
-    //res.send(ret)
 	res.send(ris);
   })
   
