@@ -9,4 +9,4 @@ In particolar modo il sito interagisce con il webservice per leggere i contenuti
 Inoltre è possibile eseguire la query e vedere il risultato direttamente nella pagina web
 
 Piccolo esempio:
-![](https://i.ibb.co/mB5vhhX/sql-wizard.gif)
+![](https://i.ibb.co/WgvLGwm/ezgif-com-video-to-gif.gif)
