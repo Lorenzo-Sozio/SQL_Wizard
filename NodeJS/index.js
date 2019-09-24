@@ -1,12 +1,10 @@
-const http = require('http')
 const url = require('url')
 const querystring = require('querystring')
 
 var app = require('express')();
-app.use(require('morgan')('dev'));
+//app.use(require('morgan')('dev'));
 
 var session = require('express-session');
-var FileStore = require('session-file-store')(session);
 
 var bodyParser = require('body-parser');
 var cors = require('cors')
