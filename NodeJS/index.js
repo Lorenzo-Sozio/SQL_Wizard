@@ -83,23 +83,28 @@ app.get('/run', function (req, res) {
   var righe, pianoesecuzione
   var data =	{ rows: [{}], explain: [{}], error:"" }
 
-  const key = 'query'
-  const explain_sql = 'EXPLAIN ' + parsedQs[key]
-  console.log(explain_sql)
-  
+  const key = 'query';
+  //rimuovo doppi spazi
+  parsedQs[key] = parsedQs[key].replace(/ +(?= )/g,'');
+
+  let tables = parsedQs[key].toLowerCase().match(/(from|update)\s+(\w+)/g).map(e => e.split(' ')[1])
+  const select_sql = "SELECT * FROM " + tables.toString();
+  console.log(select_sql);
   connection.query(parsedQs[key], function (err, rows_1, fields) {
 	if(err) {data.error=err}
     if (err) { console.log('Error while performing Query.' + err) }
 
     data.rows = rows_1
-
-    connection.query(explain_sql, function (err, rows_2, fields) {
-      if (err) { console.log('Error while performing Query.' + err) }
-      data.explain = rows_2
-	  
-	  connection.end();
-	  res.end(data);	  
-    })
+	if (!parsedQs[key].toLowerCase().startsWith("select")){
+		connection.query(select_sql, function (err, rows_2, fields) {
+		if (err) { console.log('Error while performing Query.' + err) }
+		data.rows = rows_2
+		  
+		  connection.end();
+		  res.send(data);	  
+		})
+	}else
+		res.send(data);	  		
   })
 })
 
