@@ -19,6 +19,10 @@ body {
 	margin-left: -4px;
 }
 
+.pointer {
+	cursor: pointer;
+}
+
 .table-responsive {
 	overflow: visible !important;
 }

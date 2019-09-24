@@ -246,10 +246,13 @@ $(document).ready(function() {
 			},
 			contentType: "text/plain",
 			success: function(data) {
+				if (data.error != "") {
+					alert("Errore query: " + data.error.sqlMessage);
+				} else {
+					let tbl_ris = CreaTabellaDati(data.rows)
 
-				var tbl_ris = CreaTabellaDati(data.rows)
-
-				$('#sql_risultato').html(tbl_ris)
+					$('#sql_risultato').html(tbl_ris)
+				}
 			},
 			error: function(jqXHR) {
 				if (jqXHR.status == 406) {
@@ -693,11 +696,11 @@ $(document).ready(function() {
 							Condizioni
 						</button>
 						<div class="dropdown-menu f-inherit" aria-labelledby="dropdownMenuButton">
-							<a class="dropdown-item" onclick="ImpostaCondizioneSelezionata(` + rowCount + `,'=')" href="#">uguale (=)</a>
+							<a class="dropdown-item pointer" onclick="ImpostaCondizioneSelezionata(` + rowCount + `,'=')" >uguale (=)</a>
 							<a class="dropdown-item" onclick="ImpostaCondizioneSelezionata(` + rowCount + `,'<>')" href="#">diverso (<>)</a>
 							<a class="dropdown-item" onclick="ImpostaCondizioneSelezionata(` + rowCount + `,'>')" href="#">maggiore (>)</a>
 							<a class="dropdown-item" onclick="ImpostaCondizioneSelezionata(` + rowCount + `,'>=')" href="#">maggiore uguale (>=)</a>
-							<a class="dropdown-item" onclick="ImpostaCondizioneSelezionata(` + rowCount + `,'<')" href="#">minore (<)</a>
+							<a class="dropdown-item pointer" onclick="ImpostaCondizioneSelezionata(` + rowCount + `,'<')" >minore (<)</a>
 							<a class="dropdown-item" onclick="ImpostaCondizioneSelezionata(` + rowCount + `,'<=')" href="#">minore uguale (<=)</a>
 							<a class="dropdown-item" onclick="ImpostaCondizioneSelezionata(` + rowCount + `,'%')" href="#">contiene</a>
 						</div>
