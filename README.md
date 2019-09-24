@@ -15,4 +15,4 @@ Inoltre è possibile eseguire la query e vedere il risultato direttamente nella 
 
 *Esempio UPDATE Query:*
 
-![](https://i.ibb.co/B3LgWDy/sql-update.gif)
+![](https://i.ibb.co/h9sKQ5B/sql-update.gif)
