@@ -123,21 +123,23 @@ app.get('/tables', function (req, res) {
 
   connection.query(sql, function (err, tables, fields) {
     if (err) { console.log(sql + ' Error while performing Query.' + err) }
-
-    // Make an array of promises
+	
+	console.log(tables);
+    
     var promises = tables.map(function (table) {
 		   return new Promise(function (pass, fail) {
+			
+			let tblname = eval('table.Tables_in_'+req.session.database);
+			sql = 'DESCRIBE ' + tblname
 
-        sql = 'DESCRIBE ' + table.Tables_in_progetto
+			connection.query(sql, function (err, rows, fields2) {
+			if (err) { console.log(sql + ' Error while performing Query.' + err) }
 
-        connection.query(sql, function (err, rows, fields2) {
-          if (err) { console.log(sql + ' Error while performing Query.' + err) }
-
-			connection.end();
-          ris.push({ tablename: table.Tables_in_progetto, fields: rows })
-          pass()
-        }).catch(fail)
-		   })
+				connection.end();
+				ris.push({ tablename: tblname, fields: rows })
+				pass()
+				}).catch(fail)
+			})
     })
 
     // Wait for all to complete before responding
@@ -182,7 +184,22 @@ app.get('/fields', function (req, res) {
     ret.Rows = ris
 	res.send(ret);
   })
-  
+})
+app.get('/testconnection', function (req, res) {
+
+	if (!req.session.host){
+		return res.status(406).send();
+	}
+
+  const connection = mysql.createPool({
+	  host     : req.session.host,
+	  user     : req.session.user,
+	  password : req.session.password,
+	  database : req.session.database
+	})
+	connection.query("SELECT 1", function (err, ris) {
+		if (err) return res.status(406).send(); else return res.status(200).send();
+	})
 })
 
 app.listen(port, function() {

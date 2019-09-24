@@ -97,7 +97,15 @@ function GetWhereClause () {
 
 $(document).ready(function () {
 	
-	CreaTreeView(true);
+	if(testConnection()){
+		$("#param_conn").hide();
+		$("#sql_wizard").show();
+	}
+	else{
+		$("#param_conn").show();
+		$("#sql_wizard").hide();
+	}
+	
 	
 	$('#parametri').click(function(){
 		$("#param_conn").toggle();
@@ -208,7 +216,7 @@ $(document).ready(function () {
 			xhrFields: {
 				withCredentials: true
 			},
-			crossDomain: true,
+			//crossDomain: true,
 			contentType: "text/plain",
 			//async:true,
 			success: function(result) {
@@ -251,7 +259,7 @@ $(document).ready(function () {
     xhrFields: {
        withCredentials: true
     },
-    crossDomain: true, 
+    //crossDomain: true, 
 	//async:true,
 	success: function(data){
 		      const tree = DataToTreeView(data, full)
@@ -367,7 +375,7 @@ $(document).ready(function () {
   }
   
   $("#btn_setconn").click(function(e) {
-
+	
 	var ser = $("#form_param").serialize();
 	
 	var obj = $("#form_param").serializeArray();
@@ -383,13 +391,17 @@ $(document).ready(function () {
 		xhrFields: {
 			withCredentials: true
 		},
-		crossDomain: true,
+		//crossDomain: true,
 		data: ser,
 
 	  success: (data, textStatus, jqXHR)=>{
+		  if(testConnection()){
+			$('#btn_clear').click();
 			$("#param_conn").hide();
 			$("#sql_wizard").show();
 			alert("Connessione OK!");
+		  }else
+			  alert("Parametri di connessione non validi");					
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
 
@@ -544,7 +556,7 @@ $(document).ready(function () {
 			xhrFields: {
 			   withCredentials: true
 			},
-			crossDomain: true,
+			//crossDomain: true,
 			//async:true,
 			success: function(data){
 				for (var d in data.Rows) {
@@ -602,9 +614,7 @@ $(document).ready(function () {
     var tabelle = GetTablesSelected()
 
     for (var i in tabelle) {
-      //promises.push($.getJSON(web_service_address + '/fields?table=' + tabelle[i]))
-	  
-	  
+		
 	  promises.push(
 		$.ajax(web_service_address + '/fields?table=' + tabelle[i], {
 			type: "GET",
@@ -612,7 +622,7 @@ $(document).ready(function () {
 			xhrFields: {
 			   withCredentials: true
 			},
-			crossDomain: true
+			//crossDomain: true
 			//async:true,
 		})
 	  )
@@ -688,6 +698,7 @@ $(document).ready(function () {
       $('#tbl_body_conditions').append(tbl)
     })
   }
+  
 })
 
 $('input.form-control.txt_campo2').bind('input', function () {
@@ -695,4 +706,25 @@ $('input.form-control.txt_campo2').bind('input', function () {
   $(this).val() // get the current value of the input field.
 })
 
+function testConnection(){
+    var ris;
+	$.ajax({
+        async: false,
+        url: web_service_address + '/testConnection',
+        type: 'GET',
+		contentType: "text/plain",
+		xhrFields: {
+		   withCredentials: true
+		},
+		success: function(jqXHR) {
+			ris = true;
+		},
+		error: function(jqXHR) {
+			ris = false;
+		}
+        
+    }).then();
+	
+	return ris;
+}
 
